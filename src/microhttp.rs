@@ -2,7 +2,7 @@ use std::{io, net::TcpListener};
 
 use request::Request;
 
-/// STUB: MicroHTTP struct doc
+/// This is the main struct of the µHTTP server.
 pub struct MicroHTTP {
 	// Internal listener which is used for the server part
 	listener: TcpListener,
@@ -47,23 +47,28 @@ impl MicroHTTP {
 	/// # Example
 	///
 	/// ```
-	/// use std::{net::TcpStream,thread};
+	/// use std::{io::{Read,Write},net::TcpStream};
 	/// use micro_http_server::MicroHTTP;
 	///
 	/// let server = MicroHTTP::new("127.0.0.1:3000").expect("Could not create server.");
-	/// thread::spawn(move || {
-	///     println!("Waiting for a client @ 127.0.0.1:3000...");
-	///     loop {
-	///         let client = server.next_request().unwrap();
-	///         if client.is_some() {
-	///             println!("Got a client!");
-	///             break;
+	/// println!("[Server] Waiting for a client @ 127.0.0.1:3000...");
+	///
+	/// loop {
+	///     let result = server.next_request();
+	///     if result.is_err() {
+	///         println!("Something is wrong with the client: {:?}", result.unwrap_err());
+	///         break;
+	///     }
+	///
+	///     match result.unwrap() {
+	///         None => println!("Still waiting for clients..."), // Here you can sleep or do something different
+	///         Some(client) => {
+	///             println!("Got a new client from: {:?}", client.addr());
 	///         }
-	/// 	}
-	///
-	///     let connection = TcpStream::connect("127.0.0.1:3000").expect("Could not reach server");
-	/// });
-	///
+	///     }
+	/// #    break;
+	/// }
+	/// ```
 	pub fn next_request(&self) -> Result<Option<Request>,io::Error> {
 		// See if we have any incoming connections.
 		match self.listener.accept() {
@@ -78,5 +83,37 @@ impl MicroHTTP {
 				_ => Err(err) // We encountered an error :(
 			}
 		}
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::MicroHTTP;
+	use std::{io::{Read,Write},net::TcpStream};
+
+	#[test]
+	fn echo() {
+		let server = MicroHTTP::new("127.0.0.1:65534").expect("Could not create server");
+		println!("Waiting for a client @ 127.0.0.1:65534...");
+
+		let mut connection = TcpStream::connect("127.0.0.1:65534").expect("Could not reach server");
+		println!("Connected!");
+
+		connection.write("GET /\r\n\r\n".as_bytes()).unwrap();
+
+		{
+			let opt = server.next_request().unwrap();
+			assert_eq!(true, opt.is_some());
+			let mut client = opt.unwrap();
+
+			println!("Got a client!");
+			assert_eq!(true, client.request().is_some());
+			assert_eq!("/", client.request().as_ref().unwrap());
+			client.respond_ok("TEST".as_bytes()).unwrap();
+		}
+
+		let mut buf = String::new();
+		connection.read_to_string(&mut buf).unwrap();
+		assert_eq!("HTTP/1.0 200 OK\r\nContent-Length: 4\r\n\r\nTEST", buf);
 	}
 }

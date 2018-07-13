@@ -5,6 +5,8 @@ use std::{
 };
 use super::os_windows;
 
+/// STUB: Requests struct doc
+#[derive(Debug)]
 pub struct Request {
 	stream: TcpStream,
 	addr: SocketAddr,
@@ -90,10 +92,12 @@ impl Request {
 		&self.request
 	}
 
+	/// STUB: respond_ok doc
 	pub fn respond_ok(&mut self, data: &[u8]) -> io::Result<usize> {
 		self.respond("200 OK", data, None)
 	}
 
+	/// STUB: respond doc
 	pub fn respond(&mut self, status_code: &str, data: &[u8], headers: Option<&Vec<String>>) -> io::Result<usize> {
 		// Write status line
 		let mut bytes_written =
@@ -103,6 +107,7 @@ impl Request {
 				bytes_written += try!(self.stream.write(format!("{}\r\n", h).as_bytes()));
 			}
 		}
+		bytes_written += try!(self.stream.write(data));
 
 		Ok(bytes_written)
 	}
