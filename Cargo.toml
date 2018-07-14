@@ -1,7 +1,17 @@
 [package]
-name = "micro-http-server"
-version = "0.1.0"
+name = "micro_http_server"
+version = "0.0.1"
 authors = ["Philipp Ludwig <git@philippludwig.net>"]
+license = "MIT"
+description = "A very simple HTTP server without Futures or other complicated stuff."
+repository = "https://github.com/philippludwig/micro-http-server.git"
+homepage = "https://github.com/philippludwig/micro-http-server"
+readme = "README.md"
+keywords = ["network, http, server"]
+categories = ["web-programming::http-server"]
+
+[badges]
+maintenance = { status = "passively-maintained" }
 
 [dependencies]
 log = "*"
