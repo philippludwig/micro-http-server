@@ -129,12 +129,12 @@ impl Client {
 	pub fn respond(&mut self, status_code: &str, data: &[u8], headers: &Vec<String>) -> io::Result<usize> {
 		// Write status line
 		let mut bytes_written =
-			try!(self.stream.write(format!("HTTP/1.0 {}\r\nContent-Length: {}\r\n\r\n", status_code, data.len()).as_bytes()));
+			try!(self.stream.write(format!("HTTP/1.0 {}\r\nContent-Length: {}\r\n", status_code, data.len()).as_bytes()));
 
 		for h in headers {
 			bytes_written += try!(self.stream.write(format!("{}\r\n", h).as_bytes()));
 		}
-
+		bytes_written += try!(self.stream.write("\r\n".as_bytes()));
 		bytes_written += try!(self.stream.write(data));
 
 		Ok(bytes_written)
