@@ -40,9 +40,9 @@ impl MicroHTTP {
 	/// Return the next available client which is incoming at this server.
 	///
 	/// Returns either:
-	/// * Some(client) if a client is available
-	/// * None if no client is currently available (i.e. no one has reached out to the server yet)
-	/// * std::io::Error if something is wrong with the server.
+	/// * ``Some(client)`` if a client is available
+	/// * ``None`` if no client is currently available (i.e. no one has reached out to the server yet)
+	/// * ``std::io::Error`` if something is wrong with the server.
 	///
 	/// # Example
 	///
@@ -61,7 +61,10 @@ impl MicroHTTP {
 	///     }
 	///
 	///     match result.unwrap() {
-	///         None => println!("Still waiting for clients..."), // Here you can sleep or do something different
+	///         None => {
+	///             // Here you can sleep or do something else.
+	///             println!("Still waiting for clients...");
+	///         },
 	///         Some(client) => {
 	///             println!("Got a new client from: {:?}", client.addr());
 	///         }

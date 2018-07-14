@@ -99,12 +99,16 @@ impl Client {
 	/// implementation echos all requests except "/hello":
 	///
 	/// ```
-	/// let server = MicroHTTP::new("127.0.0.1:3000").expect("Could not create server.");
-	/// let client = server.next_request().unwrap().unwrap();
-	/// let request_str = client.request().as_ref().unwrap();
+	/// use micro_http_server::MicroHTTP;
+	/// use std::io::*;
+	/// let server = MicroHTTP::new("127.0.0.1:4000").expect("Could not create server.");
+	/// # let mut connection = ::std::net::TcpStream::connect("127.0.0.1:4000").unwrap();
+	/// # connection.write("GET /\r\n\r\n".as_bytes());
+	/// let mut client = server.next_client().unwrap().unwrap();
+	/// let request_str: String = client.request().as_ref().unwrap().clone();
 	///
-	/// match request_str {
-	///     "/hello" => client.respond_ok(&[]),
+	/// match request_str.as_ref() {
+	/// 	"/hello" => client.respond_ok(&[]),
 	///     _ => client.respond_ok(request_str.as_bytes())  // Echo request
 	/// };
 	/// ```
