@@ -5,9 +5,11 @@ use std::{
 };
 use super::os_windows;
 
-/// STUB: Requests struct doc
+/// This struct represents a client which has connected to the µHTTP server.microhttp
+///
+/// If an instance of this struct is dropped, the connection is closed.
 #[derive(Debug)]
-pub struct Request {
+pub struct Client {
 	stream: TcpStream,
 	addr: SocketAddr,
 	request: Option<String>
@@ -60,15 +62,15 @@ fn extract_request_url(buf: &[u8]) -> Option<String> {
 	None
 }
 
-impl Request {
-	pub(crate) fn new(mut stream : TcpStream, addr : SocketAddr) -> Result<Request,::std::io::Error> {
+impl Client {
+	pub(crate) fn new(mut stream : TcpStream, addr : SocketAddr) -> Result<Client,::std::io::Error> {
 		// Read all data now, since we only expect simple requests like "HTTP 1.0 GET /"
 		let data = try!(read_all(&mut stream));
 
 		// Extract the request
 		let request = extract_request_url(&data);
 
-		Ok(Request {
+		Ok(Client {
 			stream: stream,
 			addr: addr,
 			request: match request {
@@ -78,7 +80,7 @@ impl Request {
 		})
 	}
 
-	/// Return the address of the requesting client.
+	/// Return the address of the requesting client, for example "1.2.3.4:9435".
 	pub fn addr(&self) -> SocketAddr {
 		self.addr
 	}
@@ -92,7 +94,20 @@ impl Request {
 		&self.request
 	}
 
-	/// STUB: respond_ok doc
+	/// Send a HTTP 200 OK response to the client + the provided data.
+	/// The data may be an empty array, for example the following
+	/// implementation echos all requests except "/hello":
+	///
+	/// ```
+	/// let server = MicroHTTP::new("127.0.0.1:3000").expect("Could not create server.");
+	/// let client = server.next_request().unwrap().unwrap();
+	/// let request_str = client.request().as_ref().unwrap();
+	///
+	/// match request_str {
+	///     "/hello" => client.respond_ok(&[]),
+	///     _ => client.respond_ok(request_str.as_bytes())  // Echo request
+	/// };
+	/// ```
 	pub fn respond_ok(&mut self, data: &[u8]) -> io::Result<usize> {
 		self.respond("200 OK", data, None)
 	}

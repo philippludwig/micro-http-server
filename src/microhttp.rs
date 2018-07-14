@@ -1,6 +1,6 @@
 use std::{io, net::TcpListener};
 
-use request::Request;
+use client::Client;
 
 /// This is the main struct of the µHTTP server.
 pub struct MicroHTTP {
@@ -27,7 +27,7 @@ impl MicroHTTP {
 		// Create listener using the requested interface
 		let listener = try!(TcpListener::bind(interface));
 
-		// Set to non-blocking so we can later check if we have requests
+		// Set to non-blocking so we can later check if we have clients
 		// without blocking the whole thread.
 		try!(listener.set_nonblocking(true));
 
@@ -37,11 +37,11 @@ impl MicroHTTP {
 		})
 	}
 
-	/// Return the next available request which is incoming at this server.
+	/// Return the next available client which is incoming at this server.
 	///
 	/// Returns either:
-	/// * Some(Request) if a request is available
-	/// * None if no request is currently available (i.e. no client has reached out to the server yet)
+	/// * Some(client) if a client is available
+	/// * None if no client is currently available (i.e. no one has reached out to the server yet)
 	/// * std::io::Error if something is wrong with the server.
 	///
 	/// # Example
@@ -54,7 +54,7 @@ impl MicroHTTP {
 	/// println!("[Server] Waiting for a client @ 127.0.0.1:3000...");
 	///
 	/// loop {
-	///     let result = server.next_request();
+	///     let result = server.next_client();
 	///     if result.is_err() {
 	///         println!("Something is wrong with the client: {:?}", result.unwrap_err());
 	///         break;
@@ -69,12 +69,12 @@ impl MicroHTTP {
 	/// #    break;
 	/// }
 	/// ```
-	pub fn next_request(&self) -> Result<Option<Request>,io::Error> {
+	pub fn next_client(&self) -> Result<Option<Client>,io::Error> {
 		// See if we have any incoming connections.
 		match self.listener.accept() {
-			// We do - try to create a Request from the incoming socket & addr,
+			// We do - try to create a Client from the incoming socket & addr,
 			// then return it.
-			Ok( (socket, addr) ) => Ok(Some(try!(Request::new(socket, addr)))),
+			Ok( (socket, addr) ) => Ok(Some(try!(Client::new(socket, addr)))),
 
 			// Check if we just don't have an incoming connection or
 			// if really an error occured.
@@ -102,7 +102,7 @@ mod tests {
 		connection.write("GET /\r\n\r\n".as_bytes()).unwrap();
 
 		{
-			let opt = server.next_request().unwrap();
+			let opt = server.next_client().unwrap();
 			assert_eq!(true, opt.is_some());
 			let mut client = opt.unwrap();
 

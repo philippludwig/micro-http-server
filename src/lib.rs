@@ -24,19 +24,20 @@
 //! println!("[Server] Waiting for a client @ 127.0.0.1:3000...");
 //!
 //! // Client side: Connect to it and request a file.
-//! let mut connection = TcpStream::connect("127.0.0.1:3000").expect("Could not reach server");
+//! let mut connection = TcpStream::connect("127.0.0.1:3000")
+//!     .expect("Could not reach server");
 //! println!("[Client] Connected! - Requesting /cat.txt...");
 //! connection.write("GET /cat.txt\r\n\r\n".as_bytes());
 //!
 //! {
-//! 	// Server side: Get request and send a response.
-//!     let mut client = server.next_request().unwrap().unwrap();
+//! 	// Server side: Get client and send a response.
+//!     let mut client = server.next_client().unwrap().unwrap();
 //!     println!("[Server] Client requested: {}", client.request().as_ref().unwrap());
 //!     let bytes_written = client.respond_ok("Cats are nice.\n".as_bytes()).unwrap();
 //!     println!("[Server] Sent {} bytes to the client.", bytes_written);
 //! } // client is dropped here to close the TcpStream.
 //!
-//! // Read response
+//! // Client side: Read response
 //! let mut buf = String::new();
 //! connection.read_to_string(&mut buf);
 //! println!("[Client] Content of cat.txt: {}", buf);
@@ -45,10 +46,10 @@
 #[macro_use] extern crate log;
 
 mod microhttp;
-mod request;
+mod client;
 
 pub use microhttp::MicroHTTP;
-pub use request::Request;
+pub use client::Client;
 
 #[cfg(target_os="linux")]
 fn os_windows() -> bool { false }
