@@ -113,19 +113,28 @@ impl Client {
 	/// };
 	/// ```
 	pub fn respond_ok(&mut self, data: &[u8]) -> io::Result<usize> {
-		self.respond("200 OK", data, None)
+		self.respond("200 OK", data, &vec!())
 	}
 
-	/// STUB: respond doc
-	pub fn respond(&mut self, status_code: &str, data: &[u8], headers: Option<&Vec<String>>) -> io::Result<usize> {
+	/// Send response data to the client.
+	///
+	/// This is similar to ``respond_ok``, but you may control the details yourself.
+	///
+	/// # Parameters
+	/// * ``status_code``: Select the status code of the response, e.g. ``200 OK``.
+	/// * ``data``: Data to transmit. May be empty.
+	/// * ``headers``: Additional headers to add to the response. May be empty.
+	///
+	/// Calling ``respond("200 OK", data, &vec!())`` is the same as calling ``respond_ok(data)``.
+	pub fn respond(&mut self, status_code: &str, data: &[u8], headers: &Vec<String>) -> io::Result<usize> {
 		// Write status line
 		let mut bytes_written =
 			try!(self.stream.write(format!("HTTP/1.0 {}\r\nContent-Length: {}\r\n\r\n", status_code, data.len()).as_bytes()));
-		if headers.is_some() {
-			for h in headers.unwrap() {
-				bytes_written += try!(self.stream.write(format!("{}\r\n", h).as_bytes()));
-			}
+
+		for h in headers {
+			bytes_written += try!(self.stream.write(format!("{}\r\n", h).as_bytes()));
 		}
+
 		bytes_written += try!(self.stream.write(data));
 
 		Ok(bytes_written)
