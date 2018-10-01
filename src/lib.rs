@@ -51,11 +51,8 @@ mod client;
 pub use microhttp::MicroHTTP;
 pub use client::Client;
 
-#[cfg(target_os="linux")]
+#[cfg(not(target_os="windows"))]
 fn os_windows() -> bool { false }
 
 #[cfg(target_os="windows")]
 fn os_windows() -> bool { true }
-
-
-
