@@ -11,6 +11,10 @@ low-level frameworks like hyper, which also is severly lacking in
 documentation and examples; therefore I created µHTTP which does
 everything I need.
 
+## Changelog
+
+* 0.0.3: Added support for OS X, thanks to [SteamPoweredAnimal](https://github.com/SteamPoweredAnimal).
+
 ## Features
 * HTTP/1.0 GET requests
 * Custom headers & responses
