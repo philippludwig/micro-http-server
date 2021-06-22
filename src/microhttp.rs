@@ -27,15 +27,17 @@ impl MicroHTTP {
 		// Create listener using the requested interface
 		let listener = TcpListener::bind(interface)?;
 
-		// Set to non-blocking so we can later check if we have clients
-		// without blocking the whole thread.
-		listener.set_nonblocking(true)?;
-
 		// Return created instance
 		Ok(MicroHTTP {
 			listener : listener
 		})
 	}
+
+	/// Set whether or not the underlying TcpListener awaits connections in nonblocking mode
+	pub fn set_nonblocking(&mut self, state: bool) -> Result<(), io::Error> {
+		self.listener.set_nonblocking(state)
+	}
+
 
 	/// Return the next available client which is incoming at this server.
 	///
