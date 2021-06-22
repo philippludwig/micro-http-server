@@ -1,4 +1,4 @@
-use std::{io, net::TcpListener};
+use std::{io, net::{TcpListener, ToSocketAddrs}};
 
 use client::Client;
 
@@ -23,13 +23,13 @@ impl MicroHTTP {
 	/// let server = MicroHTTP::new(interface)
 	///     .expect("Could not create server, maybe the port is already being used?");
 	/// ```
-	pub fn new(interface: &str) -> Result<MicroHTTP,io::Error> {
+	pub fn new(interface: impl ToSocketAddrs) -> Result<MicroHTTP,io::Error> {
 		// Create listener using the requested interface
-		let listener = try!(TcpListener::bind(interface));
+		let listener = TcpListener::bind(interface)?;
 
 		// Set to non-blocking so we can later check if we have clients
 		// without blocking the whole thread.
-		try!(listener.set_nonblocking(true));
+		listener.set_nonblocking(true)?;
 
 		// Return created instance
 		Ok(MicroHTTP {
@@ -77,7 +77,7 @@ impl MicroHTTP {
 		match self.listener.accept() {
 			// We do - try to create a Client from the incoming socket & addr,
 			// then return it.
-			Ok( (socket, addr) ) => Ok(Some(try!(Client::new(socket, addr)))),
+			Ok( (socket, addr) ) => Ok(Some(Client::new(socket, addr)?)),
 
 			// Check if we just don't have an incoming connection or
 			// if really an error occured.

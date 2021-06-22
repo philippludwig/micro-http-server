@@ -65,7 +65,7 @@ fn extract_request_url(buf: &[u8]) -> Option<String> {
 impl Client {
 	pub(crate) fn new(mut stream : TcpStream, addr : SocketAddr) -> Result<Client,::std::io::Error> {
 		// Read all data now, since we only expect simple requests like "HTTP 1.0 GET /"
-		let data = try!(read_all(&mut stream));
+		let data = read_all(&mut stream)?;
 
 		// Extract the request
 		let request = extract_request_url(&data);
@@ -129,13 +129,13 @@ impl Client {
 	pub fn respond(&mut self, status_code: &str, data: &[u8], headers: &Vec<String>) -> io::Result<usize> {
 		// Write status line
 		let mut bytes_written =
-			try!(self.stream.write(format!("HTTP/1.0 {}\r\nContent-Length: {}\r\n", status_code, data.len()).as_bytes()));
+			self.stream.write(format!("HTTP/1.0 {}\r\nContent-Length: {}\r\n", status_code, data.len()).as_bytes())?;
 
 		for h in headers {
-			bytes_written += try!(self.stream.write(format!("{}\r\n", h).as_bytes()));
+			bytes_written += self.stream.write(format!("{}\r\n", h).as_bytes())?;
 		}
-		bytes_written += try!(self.stream.write("\r\n".as_bytes()));
-		bytes_written += try!(self.stream.write(data));
+		bytes_written += self.stream.write("\r\n".as_bytes())?;
+		bytes_written += self.stream.write(data)?;
 
 		Ok(bytes_written)
 	}
