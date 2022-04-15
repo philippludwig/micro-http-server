@@ -13,6 +13,7 @@ everything I need.
 
 ## Changelog
 
+* 0.0.5: Support for turning off nonblocking mode, thanks to [chili-b](https://github.com/chili-b).
 * 0.0.3: Added support for OS X, thanks to [SteamPoweredAnimal](https://github.com/SteamPoweredAnimal).
 
 ## Features

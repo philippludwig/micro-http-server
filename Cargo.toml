@@ -1,6 +1,6 @@
 [package]
 name = "micro_http_server"
-version = "0.0.4"
+version = "0.0.5"
 authors = ["Philipp Ludwig <git@philippludwig.net>"]
 license = "MIT"
 description = "A very simple HTTP server without Futures or other complicated stuff."
